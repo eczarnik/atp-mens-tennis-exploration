@@ -5,7 +5,7 @@ SI 544 Final Project
 
 2022-11-04
 
-[*View the ATP Men's Tennis Project*](https:eczarnik/github.io/atp-mens-tennis-exploration)
+[*View the ATP Men's Tennis Project*](https:eczarnik/github.io/atp-mens-tennis-exploration/)
 
 ## Data
 The data comes from a collection of ATP Men's Tennis data tracked on GitHub. For the purposes of this analysis, match data from 2022 was utilized and includes a variety of player attributes such as age, height, handedness, tourneys played in, wins, lossess, etc. View the [2022 ATP Men's Tennis data](https://raw.githubusercontent.com/JeffSackmann/tennis_atp/master/atp_matches_2022.csv).
