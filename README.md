@@ -1,2 +1,3 @@
-# atp-mens-tennis-exploration
+# ATP Mens Tennis Exploration
+Elaine Czarnik
 SI 544 Final Project
