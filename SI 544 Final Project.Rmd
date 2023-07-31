@@ -1,0 +1,166 @@
+---
+title: "SI 544 Final Project"
+author: "Elaine Czarnik"
+date: "2022-11-04"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+### Load Packages:
+
+For this project, we'll need to load the following datasets from our library in order to perform our analysis:
+```{r}
+library(datasets)
+library(dplyr)
+library(magrittr)
+library(ggplot2)
+library(tidyr)
+library(moderndive)
+```
+# Association of Tennis Professionals (ATP) 2022 Dataset
+The dataset we are going to be working with is the 2022 Men's ATP match data (through September 12, 2022) which was found on GitHub. If you're not familiar with the ATP, "The Association of Tennis Professionals (ATP) is the governing body of the men's professional tennis circuits - the ATP Tour, the ATP Challenger Tour and the ATP Champions Tour ("Association of Tennis Professionals," 2022)." Within our dataset, we'll be focusing on the four major tennis tournaments that make up the 'Grand Slam' title in tennis, which include the Australian Open, the French Open (also known as Roland Garros), Wimbledon, and the US Open. While the Grand Slam tournaments do not technically fall under the ATP (it falls under the International Tennis Federation), these events award the same point rankings at ATP tournaments ("Association of Tennis Professionals," 2022). 
+
+Let's load the ATP 2022 dataset and take a look at what's in it:
+```{r}
+atp_2022 <- read.csv(url("https://raw.githubusercontent.com/JeffSackmann/tennis_atp/master/atp_matches_2022.csv"))
+View(atp_2022)
+```
+
+### Data Wrangling:
+From the first look at the dataset, we have a ton of different tennis matches that have taken place so far this year! However, we only want to analyze match data from the four Grand Slam tournaments. In order to do this, we need to wrangle our data by filtering down the dataset to just include data from the four Grand Slam Tournaments data using the filter() method on the 'tourney_name' variable, and we're going to store it in a new variable called 'grand_slam_tournaments' so we have a new dataframe to work with.
+```{r}
+grand_slam_tournaments <- atp_2022 %>%
+  filter(tourney_name %in% c("Australian Open", "Us Open", "Wimbledon", "Roland Garros"))
+View(grand_slam_tournaments)
+```
+
+Now that we have filtered our dataframe down to just include data from the the four Grand Slam tournaments, let's also clean up the dataframe to remove any empty columns of data as well as other columns that we do not plan to use in our analysis. To do this, we will need to wrangle our data by using the select() method to remove specific columns of our 'grand_slam_tournaments' dataframe. We'll also want to store this updated dataframe in a new variable called 'grand_slam_tournaments_clean' so we can use the cleaned version for our analysis. 
+```{r}
+grand_slam_tournaments_clean <- grand_slam_tournaments %>% 
+  select(-tourney_id, -tourney_date, -match_num, -winner_seed, -winner_entry, -loser_seed, -loser_entry, -winner_id, -loser_id, -winner_rank, -winner_rank_points, -loser_rank, -loser_rank_points, -tourney_level, -draw_size, -best_of, -round)
+View(grand_slam_tournaments_clean)
+```
+Now our dataframe is cleaned and ready for us to have some fun! 
+
+### Descriptive Statistics:
+Let's get to know our dataset a little better by gathering some descriptive statistics. 
+
+#### Average Age by Winners and Losers
+We'll start by looking at 'Age' between our Grand Slam winners and losers. First, let's find the average 'winner_age' and average 'loser_age' by using mean():
+```{r}
+mean_winner_age <- round(mean(grand_slam_tournaments_clean$winner_age), 0)
+mean_winner_age
+mean_loser_age <- round(mean(grand_slam_tournaments_clean$loser_age), 0)
+mean_loser_age
+```
+Interestingly, the average age of our winners and losers is the same: 27 years old!
+
+#### Minimum Age by Winners and Losers
+What if we want to know the age of the youngest winner and loser? We can find this by calling the min() function on our 'winner_age' and 'loser_age':
+```{r}
+min_winner_age <- round(min(grand_slam_tournaments_clean$winner_age), 0)
+min_winner_age
+min_loser_age <- round(min(grand_slam_tournaments_clean$loser_age), 0)
+min_loser_age
+```
+Taking a look at the results, our youngest winner across Grand Slam tournaments is 19 years old and the youngest loser is 17 years old. Looks like we have some young talent competing at these high level of tennis matches!
+
+#### Maximum Age by Winners and Losers
+What if we want to know the age of the oldest winner and loser? We can find this by calling the max() function on our 'winner_age' and 'loser_age':
+```{r}
+max_winner_age <- round(max(grand_slam_tournaments_clean$winner_age), 0)
+max_winner_age
+max_loser_age <- round(max(grand_slam_tournaments_clean$loser_age), 0)
+max_loser_age
+```
+Taking a look at the results, our oldest winner across Grand Slam tournaments is 38 years old, and the oldest loser is 41 years old.
+
+### Visualizing Winner and Loser Age
+We can plot the spread of our winner and loser age with a boxplot. Let's start with the 'winner_age' first:
+```{r}
+ggplot(grand_slam_tournaments_clean, aes(y = winner_age)) +
+  geom_boxplot() + 
+  labs(title="Spread of Grand Slam Winner Ages", y="Age")
+```
+
+Now, we'll do the plot for our 'loser_age':
+```{r}
+ggplot(grand_slam_tournaments_clean, aes(y = loser_age)) +
+  geom_boxplot() + 
+  labs(title="Spread of Grand Slam Loser Ages", y="Age")
+```
+
+
+Generally, the boxplots look identical. The loser boxplot has a few outliers for max age, noted by the black dots. It looks like there are a few loser's whose age is just above 40 years old. 
+
+### Visualization of Winner and Loser Handedness
+
+Let's explore another variable in our dataframe with visualization. In tennis, players predominately use one hand for serving and hitting the ball throughout the entire duration of the match. Let's visualize using barplots which hand (left or right) our players are using in each of the Grand Slam tournaments. First, we'll start with our 'winner_hand':
+```{r}
+ggplot(grand_slam_tournaments_clean, aes(x = tourney_name, fill=winner_hand)) + geom_bar(stat = "count") +
+  labs(title="Grand Slam Winners Handedness by Tourneys", x="Tournaments", y="Count of Handedness")
+```
+
+Across all four tournaments, most winners are using their right hand for play, and the tournament that has the most right-handed players is the French Open (Roland Garros). We do have have a good portion of winners that use their left hand, and out of all the tournaments most of the left handed players play in Wimbledon. There is also a very small proportion of winners in our dataset who's hand is undetermined ("U), indicated by the blue shaded area at the bottom of the barplots. It looks like there may be a few instances of winners who don't have a predominant hand they use or indicated they use in the US Open and Wimbledon tournaments. 
+
+Let's create this same handedness visualization for our 'loser_hand':
+```{r}
+ggplot(grand_slam_tournaments_clean, aes(x = tourney_name, fill=loser_hand)) + geom_bar(stat = "count") +
+  labs(title="Grand Slam Losers Handedness by Tourneys", x="Tournaments", y="Count of Handedness")
+```
+
+We see some striking similarities in the visuals between our losers and winners handedness! Again, a majority of our losers are also right-handed, and the Roland Garros tournament has the most right-handed players compared to the other three tournaments. We also have a good proportion of losers who predominately use their left-hand, and it appears the US Open and Wimbeldon are neck and neck in the count of left-handed losers they had in this year's tournaments. We also have a small proportion of losers who's handedness is undetermined, with the most having played at the US Open.
+
+### Fit Linear Model
+Let's fit a linear model to see if there a relationship between player height and the number of aces. In tennis, "...an ace is a legal serve that is not touched by the receiver, winning the point for the server ("Aces(tennis)," 2022). Let's start with our winners:
+```{r}
+model2<- lm(w_ace ~ winner_ht, data = grand_slam_tournaments_clean)
+get_regression_table(model2)
+```
+Let's interpret what the coefficients means in our table. When the winner height 'winner_ht' is zero, the expected number of aces is -98.560. 
+
+For our slope, if we were to increase winner height by 1, we would expect the number of aces to increase by 0.583. The equation for our line would be: model2 <- 0.583*winner_ht + (-98.560).
+
+
+We can also make a scatterplot with our linear model line of winner height and winner aces to visualize this relationship:
+```{r}
+ggplot(grand_slam_tournaments_clean, aes(x = winner_ht, y = w_ace)) +
+  geom_point() +
+  labs(x = "Winner Height", 
+       y = "Winner Aces",
+       title = "Scatterplot of relationship of winner height and winner aces") +
+  geom_smooth(method = "lm", se = FALSE)
+```
+In the scatterplot, we see the blue line is increasing, showing us that as winner height increases, the number of winner aces also increases. There is a positive relationship between these two variables. 
+
+Let's fit one more linear model, this time let's see if there is a relationship between 'winner_age' and 'minutes' (length of match):
+```{r}
+model3<- lm(minutes ~ winner_age, data = grand_slam_tournaments_clean)
+get_regression_table(model3)
+```
+Let's interpret what the coefficients means in our table. When the winner age 'winner_age' is zero, the expected length of the match is 166.857 minutes. 
+
+For our slope, if we were to increase winner age by 1, we would expect the length of the match to decrease by -0.139 minutes. The equation for our line would be: model3 <- -0.139*winner_age + 166.857.
+
+
+We can also make a scatterplot with our linear model line of winner age and minutes to visualize this relationship:
+
+```{r}
+ggplot(grand_slam_tournaments_clean, aes(x = winner_age, y = minutes)) +
+  geom_point() +
+  labs(x = "Winner Age", 
+       y = "Length of Match (minutes)",
+       title = "Scatterplot of relationship of winner age and length of match") +
+  geom_smooth(method = "lm", se = FALSE)
+```
+
+In the scatterplot, we see the blue line is slightly decreasing, showing us that as winner age increases, the length of the match in minutes decreases. There is a negative relationship between these two variables. 
+
+### References
+
+Ace(tennis). (2022). In *Wikipedia.* https://en.wikipedia.org/wiki/Ace_(tennis)
+
+Association of tennis professionals. (2022). In *Wikipedia.*   https://en.wikipedia.org/wiki/Association_of_Tennis_Professionals
+
